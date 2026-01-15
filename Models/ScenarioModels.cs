@@ -24,4 +24,11 @@ public class Turn
     public string AgentReply { get; set; } = string.Empty;
     public string? AgentReplyCollapsedTitle { get; set; }
     public string? AgentReplyCollapsed { get; set; }
+    public List<CollapsedSection>? AgentReplyCollapsedSections { get; set; }
+}
+
+public class CollapsedSection
+{
+    public string Title { get; set; } = string.Empty;
+    public string Body { get; set; } = string.Empty;
 }

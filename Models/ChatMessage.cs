@@ -9,4 +9,5 @@ public class ChatMessage
     public string? AgentName { get; set; }
     public string? CollapsedTitle { get; set; }
     public string? CollapsedText { get; set; }
+    public List<CollapsedSection>? AgentReplyCollapsedSections { get; set; }
 }
