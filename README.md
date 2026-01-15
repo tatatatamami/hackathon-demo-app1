@@ -5,7 +5,7 @@
 ## 概要
 
 このアプリケーションは、.NET 8 Blazor Web Appで構築されたデモ用のスタブチャットUIです。
-複数のゲームエージェント（Game A～E）とチャットできる機能を提供します。
+複数のゲームエージェント（Red Dragon / Game B～E）とチャットできる機能を提供します。
 
 ## 技術スタック
 
@@ -19,7 +19,7 @@
 ### UI構成
 
 - **左サイドバー（300px）**
-  - エージェント一覧（Game A Agent ～ Game E Agent）
+  - エージェント一覧（Red Dragon Agent / Game B Agent ～ Game E Agent）
   - 選択中のエージェントは紫色でハイライト
   - 下部にユーザー名「Tamami」を表示
 
@@ -122,7 +122,7 @@ dotnet watch run
 
 ### フィールドの説明
 
-- `agentName`: エージェント名（"Game A Agent" など）
+- `agentName`: エージェント名（"Red Dragon Agent" など）
 - `kadaiId`: 課題ID（"kadai1", "kadai2", "kadai3"）
 - `userExact`: ユーザー入力と完全一致する文字列（任意、nullも可）
 - `keywords`: 部分一致で検索するキーワード配列（任意、nullも可）
@@ -155,7 +155,7 @@ dotnet watch run
 
 ## 注意事項
 
-- **Game A Agent** のみが完全に機能します
+- **Red Dragon Agent** のみが完全に機能します
 - Game B～E Agentは「権限なし」として表示され、送信が無効化されます
 - 画像添付は最大5MBまで対応
 - JSONファイルを変更した場合は必ずアプリケーションを再起動してください
