@@ -15,7 +15,7 @@ public class ReplyEngine
         _repository = repository;
     }
 
-    public async Task<string> GetReplyAsync(string agentName, string userMessage, bool hasImage)
+    public async Task<Turn?> GetReplyAsync(string agentName, string userMessage, bool hasImage)
     {
         // Add random delay for demo effect (500-900ms)
         var delay = _random.Next(MinDelayMs, MaxDelayMs);
@@ -24,7 +24,7 @@ public class ReplyEngine
         var scenario = _repository.GetScenarioByAgentName(agentName);
         if (scenario == null)
         {
-            return "申し訳ございません。このエージェントのシナリオが見つかりません。";
+            return new Turn { AgentReply = "申し訳ございません。このエージェントのシナリオが見つかりません。" };
         }
 
         // Determine kadai based on priority rules
@@ -44,13 +44,13 @@ public class ReplyEngine
         else
         {
             // Rule 4: Default guide message
-            return "このデモは課題1〜3の想定質問に対応しています。テンプレート質問を使ってください。";
+            return new Turn { AgentReply = "このデモは課題1〜3の想定質問に対応しています。テンプレート質問を使ってください。" };
         }
 
         var kadai = scenario.Kadai.FirstOrDefault(k => k.KadaiId == kadaiId);
         if (kadai == null || kadai.Turns.Count == 0)
         {
-            return "申し訳ございません。該当する課題が見つかりません。";
+            return new Turn { AgentReply = "申し訳ございません。該当する課題が見つかりません。" };
         }
 
         // Find matching turn
@@ -75,6 +75,6 @@ public class ReplyEngine
             matchedTurn = kadai.Turns.First();
         }
 
-        return matchedTurn.AgentReply;
+        return matchedTurn;
     }
 }

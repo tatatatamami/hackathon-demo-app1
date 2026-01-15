@@ -7,4 +7,6 @@ public class ChatMessage
     public string? ImageDataUrl { get; set; }
     public DateTime Timestamp { get; set; }
     public string? AgentName { get; set; }
+    public string? CollapsedTitle { get; set; }
+    public string? CollapsedText { get; set; }
 }

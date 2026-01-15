@@ -53,6 +53,15 @@
                         }
                         <div class="message-bubble">
                             <div class="message-text">@message.Text</div>
+                            @if (!string.IsNullOrWhiteSpace(message.CollapsedText))
+                            {
+                                <details class="agent-details">
+                                    <summary>@(message.CollapsedTitle ?? "詳細")</summary>
+                                    <div class="agent-details-body">
+                                        @message.CollapsedText
+                                    </div>
+                                </details>
+                            }
                             @if (!string.IsNullOrEmpty(message.ImageDataUrl))
                             {
                                 <div class="message-image" @onclick="() => ShowImageModal(message.ImageDataUrl)">
@@ -220,7 +229,7 @@
         StateHasChanged();
 
         // Get reply from engine
-        var reply = await ReplyEngine.GetReplyAsync(_selectedAgent, messageText, hasImage);
+        var replyTurn = await ReplyEngine.GetReplyAsync(_selectedAgent, messageText, hasImage);
 
         // Hide typing indicator
         _isTyping = false;
@@ -229,9 +238,11 @@
         var agentMessage = new ChatMessage
         {
             Role = "Agent",
-            Text = reply,
+            Text = replyTurn?.AgentReply ?? "返信を取得できませんでした。",
             Timestamp = DateTime.Now,
-            AgentName = _selectedAgent
+            AgentName = _selectedAgent,
+            CollapsedTitle = replyTurn?.AgentReplyCollapsedTitle,
+            CollapsedText = replyTurn?.AgentReplyCollapsed
         };
         _messages.Add(agentMessage);
 
