@@ -22,11 +22,23 @@ public class ScenarioRepository
             throw new FileNotFoundException($"Scenario file not found: {filePath}");
         }
 
-        var json = await File.ReadAllTextAsync(filePath);
-        _scenarioRoot = JsonSerializer.Deserialize<ScenarioRoot>(json, new JsonSerializerOptions
+        try
         {
-            PropertyNameCaseInsensitive = true
-        });
+            var json = await File.ReadAllTextAsync(filePath);
+            _scenarioRoot = JsonSerializer.Deserialize<ScenarioRoot>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+            
+            if (_scenarioRoot == null)
+            {
+                throw new InvalidOperationException("Failed to deserialize scenario file: result is null");
+            }
+        }
+        catch (JsonException ex)
+        {
+            throw new InvalidOperationException($"Invalid JSON format in scenario file: {ex.Message}", ex);
+        }
     }
 
     public Scenario? GetScenarioByAgentName(string agentName)

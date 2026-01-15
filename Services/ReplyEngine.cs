@@ -4,6 +4,9 @@ namespace ChatApp.Services;
 
 public class ReplyEngine
 {
+    private const int MinDelayMs = 500;
+    private const int MaxDelayMs = 900;
+    
     private readonly ScenarioRepository _repository;
     private readonly Random _random = new();
 
@@ -15,7 +18,7 @@ public class ReplyEngine
     public async Task<string> GetReplyAsync(string agentName, string userMessage, bool hasImage)
     {
         // Add random delay for demo effect (500-900ms)
-        var delay = _random.Next(500, 900);
+        var delay = _random.Next(MinDelayMs, MaxDelayMs);
         await Task.Delay(delay);
 
         var scenario = _repository.GetScenarioByAgentName(agentName);
