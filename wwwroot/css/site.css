@@ -293,6 +293,10 @@ body {
     padding: 16px 24px;
 }
 
+.chat-input-area.hidden {
+    display: none;
+}
+
 .image-preview {
     position: relative;
     display: inline-block;
