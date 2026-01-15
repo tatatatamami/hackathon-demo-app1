@@ -22,4 +22,6 @@ public class Turn
     public string? UserExact { get; set; }
     public List<string>? Keywords { get; set; }
     public string AgentReply { get; set; } = string.Empty;
+    public string? AgentReplyCollapsedTitle { get; set; }
+    public string? AgentReplyCollapsed { get; set; }
 }

@@ -16,7 +16,16 @@
             {
                 <div class="agent-item @(agent == _selectedAgent ? "selected" : "")" 
                      @onclick="() => SelectAgent(agent)">
-                    <div class="agent-avatar">🤖</div>
+                    <div class="agent-avatar">
+                        @if (TryGetAgentIconUrl(agent, out var iconUrl))
+                        {
+                            <img class="agent-avatar-img" src="@iconUrl" alt="@agent" />
+                        }
+                        else
+                        {
+                            @DefaultAgentEmoji
+                        }
+                    </div>
                     <div class="agent-name">@agent</div>
                 </div>
             }
@@ -32,7 +41,16 @@
         <!-- Header -->
         <div class="chat-header">
             <div class="header-content">
-                <div class="agent-avatar-small">🤖</div>
+                <div class="agent-avatar-small">
+                    @if (TryGetAgentIconUrl(_selectedAgent, out var headerIconUrl))
+                    {
+                        <img class="agent-avatar-img" src="@headerIconUrl" alt="@_selectedAgent" />
+                    }
+                    else
+                    {
+                        @DefaultAgentEmoji
+                    }
+                </div>
                 <div class="header-info">
                     <div class="header-agent-name">@_selectedAgent</div>
                     <div class="header-status">● Online</div>
@@ -42,7 +60,7 @@
 
         <!-- Chat Messages -->
         <div class="chat-messages" @ref="_chatMessagesDiv">
-            @if (_selectedAgent == "Game A Agent")
+            @if (_selectedAgent == PrimaryAgentName)
             {
                 @foreach (var message in _messages)
                 {
@@ -53,6 +71,15 @@
                         }
                         <div class="message-bubble">
                             <div class="message-text">@message.Text</div>
+                            @if (!string.IsNullOrWhiteSpace(message.CollapsedText))
+                            {
+                                <details class="agent-details">
+                                    <summary>@(message.CollapsedTitle ?? "詳細")</summary>
+                                    <div class="agent-details-body">
+                                        @message.CollapsedText
+                                    </div>
+                                </details>
+                            }
                             @if (!string.IsNullOrEmpty(message.ImageDataUrl))
                             {
                                 <div class="message-image" @onclick="() => ShowImageModal(message.ImageDataUrl)">
@@ -80,7 +107,7 @@
                 <div class="no-permission-message">
                     <div class="no-permission-icon">🔒</div>
                     <div class="no-permission-text">権限なし</div>
-                    <div class="no-permission-subtext">このエージェントへのアクセス権限がありません。Game A Agentをご利用ください。</div>
+                    <div class="no-permission-subtext">このエージェントへのアクセス権限がありません。@PrimaryAgentName をご利用ください。</div>
                 </div>
             }
         </div>
@@ -101,15 +128,15 @@
                           @bind:event="oninput"
                           @onkeydown="HandleKeyDown"
                           rows="3"
-                          disabled="@(_selectedAgent != "Game A Agent")"></textarea>
+                          disabled="@(_selectedAgent != PrimaryAgentName)"></textarea>
                 <div class="input-buttons">
                     <label class="attach-button" title="画像を添付">
-                        <InputFile OnChange="HandleImageSelected" accept="image/*" disabled="@(_selectedAgent != "Game A Agent")" />
+                        <InputFile OnChange="HandleImageSelected" accept="image/*" disabled="@(_selectedAgent != PrimaryAgentName)" />
                         📎
                     </label>
                     <button class="send-button" 
                             @onclick="SendMessage" 
-                            disabled="@(_selectedAgent != "Game A Agent" || (string.IsNullOrWhiteSpace(_inputMessage) && _attachedImageDataUrl == null))">
+                            disabled="@(_selectedAgent != PrimaryAgentName || (string.IsNullOrWhiteSpace(_inputMessage) && _attachedImageDataUrl == null))">
                         送信
                     </button>
                 </div>
@@ -131,15 +158,34 @@
 
 @code {
     private const int MaxFileSizeBytes = 5 * 1024 * 1024; // 5 MB
-    
-    private List<string> _agents = new() { "Game A Agent", "Game B Agent", "Game C Agent", "Game D Agent", "Game E Agent" };
-    private string _selectedAgent = "Game A Agent";
+
+    private const string PrimaryAgentName = "Red Dragon Agent";
+    private const string DefaultAgentEmoji = "🤖";
+
+    // Put your prepared icon image under `wwwroot/images/` (recommended) and set the URL here.
+    // Example: `wwwroot/images/red-dragon-agent.png` -> "/images/red-dragon-agent.png"
+    private const string PrimaryAgentIconUrl = "/images/red-dragon-agent.png";
+
+    private List<string> _agents = new() { PrimaryAgentName, "Game B Agent", "Game C Agent", "Game D Agent", "Game E Agent" };
+    private string _selectedAgent = PrimaryAgentName;
     private List<ChatMessage> _messages = new();
     private string _inputMessage = string.Empty;
     private string? _attachedImageDataUrl;
     private string? _modalImageUrl;
     private bool _isTyping = false;
     private ElementReference _chatMessagesDiv;
+
+    private static bool TryGetAgentIconUrl(string agentName, out string? iconUrl)
+    {
+        if (agentName == PrimaryAgentName)
+        {
+            iconUrl = PrimaryAgentIconUrl;
+            return true;
+        }
+
+        iconUrl = null;
+        return false;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -220,7 +266,7 @@
         StateHasChanged();
 
         // Get reply from engine
-        var reply = await ReplyEngine.GetReplyAsync(_selectedAgent, messageText, hasImage);
+        var replyTurn = await ReplyEngine.GetReplyAsync(_selectedAgent, messageText, hasImage);
 
         // Hide typing indicator
         _isTyping = false;
@@ -229,9 +275,11 @@
         var agentMessage = new ChatMessage
         {
             Role = "Agent",
-            Text = reply,
+            Text = replyTurn?.AgentReply ?? "返信を取得できませんでした。",
             Timestamp = DateTime.Now,
-            AgentName = _selectedAgent
+            AgentName = _selectedAgent,
+            CollapsedTitle = replyTurn?.AgentReplyCollapsedTitle,
+            CollapsedText = replyTurn?.AgentReplyCollapsed
         };
         _messages.Add(agentMessage);
 
