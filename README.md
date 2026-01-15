@@ -4,8 +4,11 @@
 
 ## 概要
 
-このアプリケーションは、.NET 8 Blazor Web Appで構築されたデモ用のスタブチャットUIです。
-複数のゲームエージェント（Game A～E）とチャットできる機能を提供します。
+このアプリケーションは、.NET 8 Blazor Web Appで構築されたデモ用チャットUIです。
+複数のゲームエージェント（Game A～E）を選択できる機能を提供します。
+
+**Game A Agent** は Copilot Studio の Webchat（iframe埋め込み）を表示し、実際のエージェントと会話できます。
+Game B～E Agent は「Coming Soon」として表示されます。
 
 ## 技術スタック
 
@@ -25,15 +28,43 @@
 
 - **右メインエリア**
   - ヘッダー：選択中のエージェント名と「Online」ステータス
-  - チャット領域：吹き出し形式のメッセージ表示
-    - ユーザーメッセージ：右寄せ（紫色）
-    - エージェントメッセージ：左寄せ（白色）、エージェント名表示
-  - 入力欄：
-    - 複数行テキスト入力
-    - 送信ボタン
-    - 画像添付ボタン（📎）
-  - 添付画像はプレビュー表示され、送信後のチャット履歴でサムネイル表示
-  - 画像クリックで拡大表示（モーダル）
+  - **Game A Agent選択時**：
+    - Copilot Studio Webchat を iframe で表示
+    - ローディングインジケーター表示（読み込み中）
+    - iframe は角丸デザインで全画面表示
+  - **Game B～E Agent選択時**：
+    - 「権限なし」メッセージを表示
+    - 入力欄は無効化
+
+### Copilot Studio Webchat 設定
+
+Game A Agent で表示する Copilot Studio の Webchat URL は設定ファイルで指定します。
+
+#### 設定方法1: appsettings.json を編集
+
+`appsettings.json` に以下のセクションを追加または編集：
+
+```json
+{
+  "CopilotStudio": {
+    "GameAWebChatUrl": "https://copilotstudio.microsoft.com/environments/YOUR_ENV/bots/YOUR_BOT/webchat?__version__=2"
+  }
+}
+```
+
+#### 設定方法2: 環境変数を使用
+
+環境変数で上書きすることも可能です：
+
+```bash
+# Linux/Mac
+export CopilotStudio__GameAWebChatUrl="https://copilotstudio.microsoft.com/environments/YOUR_ENV/bots/YOUR_BOT/webchat?__version__=2"
+
+# Windows (PowerShell)
+$env:CopilotStudio__GameAWebChatUrl="https://copilotstudio.microsoft.com/environments/YOUR_ENV/bots/YOUR_BOT/webchat?__version__=2"
+```
+
+**注意**: 環境変数名では `:` の代わりに `__`（ダブルアンダースコア）を使用します。
 
 ### シナリオ機能
 
@@ -140,6 +171,7 @@ dotnet watch run
 │   └── _Imports.razor          # 共通のusing宣言
 ├── Models/
 │   ├── ChatMessage.cs          # チャットメッセージモデル
+│   ├── CopilotStudioOptions.cs # Copilot Studio設定クラス
 │   └── ScenarioModels.cs       # シナリオデータモデル
 ├── Services/
 │   ├── ScenarioRepository.cs   # シナリオJSONの読み込み
@@ -155,10 +187,11 @@ dotnet watch run
 
 ## 注意事項
 
-- **Game A Agent** のみが完全に機能します
-- Game B～E Agentは「権限なし」として表示され、送信が無効化されます
-- 画像添付は最大5MBまで対応
-- JSONファイルを変更した場合は必ずアプリケーションを再起動してください
+- **Game A Agent** は Copilot Studio Webchat（iframe）を表示します
+  - 正しい Webchat URL を設定する必要があります
+  - iframe がブロックされる場合は、別の埋め込み方式を検討してください
+- **Game B～E Agent** は「Coming Soon」として表示され、アクセスが制限されています
+- スタブ応答ロジック（ReplyEngine/ScenarioRepository）は将来の拡張用に保持されていますが、現在は使用されていません
 
 ## ライセンス
 
