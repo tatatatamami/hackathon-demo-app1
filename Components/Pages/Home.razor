@@ -71,6 +71,7 @@
                         }
                         <div class="message-bubble">
                             <div class="message-text">@message.Text</div>
+                            @* Legacy single collapsed section support *@
                             @if (!string.IsNullOrWhiteSpace(message.CollapsedText))
                             {
                                 <details class="agent-details">
@@ -79,6 +80,19 @@
                                         @message.CollapsedText
                                     </div>
                                 </details>
+                            }
+                            @* New multiple collapsed sections support *@
+                            @if (message.AgentReplyCollapsedSections != null && message.AgentReplyCollapsedSections.Count > 0)
+                            {
+                                @foreach (var section in message.AgentReplyCollapsedSections)
+                                {
+                                    <details class="agent-details">
+                                        <summary>@section.Title</summary>
+                                        <div class="agent-details-body">
+                                            @section.Body
+                                        </div>
+                                    </details>
+                                }
                             }
                             @if (!string.IsNullOrEmpty(message.ImageDataUrl))
                             {
@@ -279,7 +293,8 @@
             Timestamp = DateTime.Now,
             AgentName = _selectedAgent,
             CollapsedTitle = replyTurn?.AgentReplyCollapsedTitle,
-            CollapsedText = replyTurn?.AgentReplyCollapsed
+            CollapsedText = replyTurn?.AgentReplyCollapsed,
+            AgentReplyCollapsedSections = replyTurn?.AgentReplyCollapsedSections
         };
         _messages.Add(agentMessage);
 
