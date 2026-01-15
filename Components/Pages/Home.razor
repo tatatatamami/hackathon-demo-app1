@@ -2,9 +2,11 @@
 @rendermode InteractiveServer
 @using ChatApp.Models
 @using ChatApp.Services
+@using Microsoft.Extensions.Options
 @inject ScenarioRepository ScenarioRepository
 @inject ReplyEngine ReplyEngine
 @inject IJSRuntime JSRuntime
+@inject IOptions<CopilotStudioOptions> CopilotOptions
 
 <PageTitle>Chat UI - Hackathon Demo</PageTitle>
 
@@ -44,36 +46,22 @@
         <div class="chat-messages" @ref="_chatMessagesDiv">
             @if (_selectedAgent == "Game A Agent")
             {
-                @foreach (var message in _messages)
-                {
-                    <div class="message-wrapper @(message.Role == "User" ? "user-message" : "agent-message")">
-                        @if (message.Role == "Agent")
-                        {
-                            <div class="agent-label">@message.AgentName</div>
-                        }
-                        <div class="message-bubble">
-                            <div class="message-text">@message.Text</div>
-                            @if (!string.IsNullOrEmpty(message.ImageDataUrl))
-                            {
-                                <div class="message-image" @onclick="() => ShowImageModal(message.ImageDataUrl)">
-                                    <img src="@message.ImageDataUrl" alt="Attached image" />
-                                </div>
-                            }
-                            <div class="message-time">@message.Timestamp.ToString("HH:mm")</div>
+                <!-- Copilot Studio Webchat iframe for Game A Agent -->
+                <div class="chat-frame-container">
+                    @if (_isIframeLoading)
+                    {
+                        <div class="loading-indicator">
+                            <div class="loading-spinner"></div>
+                            <div class="loading-text">Loading webchat...</div>
                         </div>
-                    </div>
-                }
-                @if (_isTyping)
-                {
-                    <div class="message-wrapper agent-message">
-                        <div class="agent-label">@_selectedAgent</div>
-                        <div class="message-bubble typing-indicator">
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </div>
-                    </div>
-                }
+                    }
+                    <iframe 
+                        src="@CopilotOptions.Value.GameAWebChatUrl"
+                        class="chat-frame @(_isIframeLoading ? "hidden" : "")"
+                        @onload="OnIframeLoaded"
+                        title="Copilot Studio Webchat">
+                    </iframe>
+                </div>
             }
             else
             {
@@ -86,7 +74,7 @@
         </div>
 
         <!-- Input Area -->
-        <div class="chat-input-area">
+        <div class="chat-input-area" style="@(_selectedAgent == "Game A Agent" ? "display: none;" : "")">
             @if (_attachedImageDataUrl != null)
             {
                 <div class="image-preview">
@@ -139,6 +127,7 @@
     private string? _attachedImageDataUrl;
     private string? _modalImageUrl;
     private bool _isTyping = false;
+    private bool _isIframeLoading = true;
     private ElementReference _chatMessagesDiv;
 
     protected override async Task OnInitializedAsync()
@@ -160,6 +149,18 @@
         _messages.Clear();
         _inputMessage = string.Empty;
         _attachedImageDataUrl = null;
+        
+        // Reset iframe loading state when switching to Game A Agent
+        if (agent == "Game A Agent")
+        {
+            _isIframeLoading = true;
+        }
+    }
+    
+    private void OnIframeLoaded()
+    {
+        _isIframeLoading = false;
+        StateHasChanged();
     }
 
     private async Task HandleImageSelected(InputFileChangeEventArgs e)

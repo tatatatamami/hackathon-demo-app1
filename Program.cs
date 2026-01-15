@@ -1,4 +1,5 @@
 using ChatApp.Components;
+using ChatApp.Models;
 using ChatApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +7,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// Register configuration
+builder.Services.Configure<CopilotStudioOptions>(
+    builder.Configuration.GetSection(CopilotStudioOptions.SectionName));
 
 // Register custom services
 builder.Services.AddSingleton<ScenarioRepository>();
