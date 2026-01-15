@@ -84,12 +84,12 @@
                             @* New multiple collapsed sections support *@
                             @if (message.AgentReplyCollapsedSections != null && message.AgentReplyCollapsedSections.Count > 0)
                             {
-                                @foreach (var section in message.AgentReplyCollapsedSections)
+                                @foreach (var collapsedSection in message.AgentReplyCollapsedSections)
                                 {
                                     <details class="agent-details">
-                                        <summary>@section.Title</summary>
+                                        <summary>@collapsedSection.Title</summary>
                                         <div class="agent-details-body">
-                                            @section.Body
+                                            @collapsedSection.Body
                                         </div>
                                     </details>
                                 }

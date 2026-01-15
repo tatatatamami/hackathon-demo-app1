@@ -1,7 +1,7 @@
 {
   "scenarios": [
     {
-      "agentName": "Game A Agent",
+      "agentName": "Red Dragon Agent",
       "kadai": [
         {
           "kadaiId": "kadai1",
