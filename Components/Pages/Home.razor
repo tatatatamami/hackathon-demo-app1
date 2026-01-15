@@ -1,0 +1,258 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@using ChatApp.Models
+@using ChatApp.Services
+@inject ScenarioRepository ScenarioRepository
+@inject ReplyEngine ReplyEngine
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Chat UI - Hackathon Demo</PageTitle>
+
+<div class="chat-container">
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+        <div class="agent-list">
+            @foreach (var agent in _agents)
+            {
+                <div class="agent-item @(agent == _selectedAgent ? "selected" : "")" 
+                     @onclick="() => SelectAgent(agent)">
+                    <div class="agent-avatar">🤖</div>
+                    <div class="agent-name">@agent</div>
+                </div>
+            }
+        </div>
+        <div class="user-info">
+            <div class="user-avatar">👤</div>
+            <div class="user-name">Tamami</div>
+        </div>
+    </div>
+
+    <!-- Main Chat Area -->
+    <div class="main-area">
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="header-content">
+                <div class="agent-avatar-small">🤖</div>
+                <div class="header-info">
+                    <div class="header-agent-name">@_selectedAgent</div>
+                    <div class="header-status">● Online</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div class="chat-messages" @ref="_chatMessagesDiv">
+            @if (_selectedAgent == "Game A Agent")
+            {
+                @foreach (var message in _messages)
+                {
+                    <div class="message-wrapper @(message.Role == "User" ? "user-message" : "agent-message")">
+                        @if (message.Role == "Agent")
+                        {
+                            <div class="agent-label">@message.AgentName</div>
+                        }
+                        <div class="message-bubble">
+                            <div class="message-text">@message.Text</div>
+                            @if (!string.IsNullOrEmpty(message.ImageDataUrl))
+                            {
+                                <div class="message-image" @onclick="() => ShowImageModal(message.ImageDataUrl)">
+                                    <img src="@message.ImageDataUrl" alt="Attached image" />
+                                </div>
+                            }
+                            <div class="message-time">@message.Timestamp.ToString("HH:mm")</div>
+                        </div>
+                    </div>
+                }
+                @if (_isTyping)
+                {
+                    <div class="message-wrapper agent-message">
+                        <div class="agent-label">@_selectedAgent</div>
+                        <div class="message-bubble typing-indicator">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="no-permission-message">
+                    <div class="no-permission-icon">🔒</div>
+                    <div class="no-permission-text">権限なし</div>
+                    <div class="no-permission-subtext">このエージェントへのアクセス権限がありません。Game A Agentをご利用ください。</div>
+                </div>
+            }
+        </div>
+
+        <!-- Input Area -->
+        <div class="chat-input-area">
+            @if (_attachedImageDataUrl != null)
+            {
+                <div class="image-preview">
+                    <img src="@_attachedImageDataUrl" alt="Preview" />
+                    <button class="remove-image-btn" @onclick="RemoveAttachedImage">×</button>
+                </div>
+            }
+            <div class="input-row">
+                <textarea class="message-input" 
+                          placeholder="メッセージを入力..." 
+                          @bind="_inputMessage" 
+                          @bind:event="oninput"
+                          @onkeydown="HandleKeyDown"
+                          rows="3"
+                          disabled="@(_selectedAgent != "Game A Agent")"></textarea>
+                <div class="input-buttons">
+                    <label class="attach-button" title="画像を添付">
+                        <InputFile OnChange="HandleImageSelected" accept="image/*" disabled="@(_selectedAgent != "Game A Agent")" />
+                        📎
+                    </label>
+                    <button class="send-button" 
+                            @onclick="SendMessage" 
+                            disabled="@(_selectedAgent != "Game A Agent" || (string.IsNullOrWhiteSpace(_inputMessage) && _attachedImageDataUrl == null))">
+                        送信
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+@if (_modalImageUrl != null)
+{
+    <div class="modal-overlay" @onclick="CloseImageModal">
+        <div class="modal-content" @onclick:stopPropagation>
+            <button class="modal-close" @onclick="CloseImageModal">×</button>
+            <img src="@_modalImageUrl" alt="Enlarged image" />
+        </div>
+    </div>
+}
+
+@code {
+    private const int MaxFileSizeBytes = 5 * 1024 * 1024; // 5 MB
+    
+    private List<string> _agents = new() { "Game A Agent", "Game B Agent", "Game C Agent", "Game D Agent", "Game E Agent" };
+    private string _selectedAgent = "Game A Agent";
+    private List<ChatMessage> _messages = new();
+    private string _inputMessage = string.Empty;
+    private string? _attachedImageDataUrl;
+    private string? _modalImageUrl;
+    private bool _isTyping = false;
+    private ElementReference _chatMessagesDiv;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ScenarioRepository.LoadScenariosAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_messages.Count > 0)
+        {
+            await JSRuntime.InvokeVoidAsync("scrollToBottom", _chatMessagesDiv);
+        }
+    }
+
+    private void SelectAgent(string agent)
+    {
+        _selectedAgent = agent;
+        _messages.Clear();
+        _inputMessage = string.Empty;
+        _attachedImageDataUrl = null;
+    }
+
+    private async Task HandleImageSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null) return;
+
+        try
+        {
+            if (file.Size > MaxFileSizeBytes)
+            {
+                // Could show user-friendly error message here
+                return;
+            }
+
+            var buffer = new byte[file.Size];
+            using var stream = file.OpenReadStream(maxAllowedSize: MaxFileSizeBytes);
+            await stream.ReadAsync(buffer);
+            var base64 = Convert.ToBase64String(buffer);
+            _attachedImageDataUrl = $"data:{file.ContentType};base64,{base64}";
+        }
+        catch (IOException)
+        {
+            // Handle file read errors silently for demo purposes
+            _attachedImageDataUrl = null;
+        }
+    }
+
+    private void RemoveAttachedImage()
+    {
+        _attachedImageDataUrl = null;
+    }
+
+    private async Task SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(_inputMessage) && _attachedImageDataUrl == null)
+            return;
+
+        // Add user message
+        var userMessage = new ChatMessage
+        {
+            Role = "User",
+            Text = _inputMessage,
+            ImageDataUrl = _attachedImageDataUrl,
+            Timestamp = DateTime.Now
+        };
+        _messages.Add(userMessage);
+
+        var messageText = _inputMessage;
+        var hasImage = _attachedImageDataUrl != null;
+
+        // Clear input
+        _inputMessage = string.Empty;
+        _attachedImageDataUrl = null;
+
+        // Show typing indicator
+        _isTyping = true;
+        StateHasChanged();
+
+        // Get reply from engine
+        var reply = await ReplyEngine.GetReplyAsync(_selectedAgent, messageText, hasImage);
+
+        // Hide typing indicator
+        _isTyping = false;
+
+        // Add agent message
+        var agentMessage = new ChatMessage
+        {
+            Role = "Agent",
+            Text = reply,
+            Timestamp = DateTime.Now,
+            AgentName = _selectedAgent
+        };
+        _messages.Add(agentMessage);
+
+        StateHasChanged();
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {
+            await SendMessage();
+        }
+    }
+
+    private void ShowImageModal(string? imageUrl)
+    {
+        _modalImageUrl = imageUrl;
+    }
+
+    private void CloseImageModal()
+    {
+        _modalImageUrl = null;
+    }
+}

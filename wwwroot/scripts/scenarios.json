@@ -1,0 +1,214 @@
+{
+  "scenarios": [
+    {
+      "agentName": "Game A Agent",
+      "kadai": [
+        {
+          "kadaiId": "kadai1",
+          "turns": [
+            {
+              "userExact": null,
+              "keywords": ["画像", "スクリーンショット", "写真"],
+              "agentReply": "画像を確認しました。このバグは既知の問題で、次回のアップデートで修正予定です。詳細な再現手順を教えていただけますか？"
+            },
+            {
+              "userExact": null,
+              "keywords": ["エラー", "問題", "不具合"],
+              "agentReply": "画像からエラーの内容を確認できました。ログファイルを確認して、詳細な原因を調査いたします。"
+            },
+            {
+              "userExact": null,
+              "keywords": null,
+              "agentReply": "画像をアップロードいただきありがとうございます。内容を確認して対応させていただきます。"
+            }
+          ]
+        },
+        {
+          "kadaiId": "kadai2",
+          "turns": [
+            {
+              "userExact": "瞬間移動のスキルが使えません",
+              "keywords": null,
+              "agentReply": "瞬間移動スキルの問題ですね。クールダウン時間は確認されましたか？また、マナが十分にあるかもご確認ください。"
+            },
+            {
+              "userExact": null,
+              "keywords": ["瞬間移動", "テレポート", "ワープ"],
+              "agentReply": "瞬間移動機能について確認いたします。現在のレベルと使用状況を教えていただけますか？"
+            },
+            {
+              "userExact": null,
+              "keywords": null,
+              "agentReply": "瞬間移動に関するお問い合わせありがとうございます。詳しい状況を教えていただけますか？"
+            }
+          ]
+        },
+        {
+          "kadaiId": "kadai3",
+          "turns": [
+            {
+              "userExact": "全選択したアイテムが記録されません",
+              "keywords": null,
+              "agentReply": "全選択機能でアイテムが記録されない問題ですね。インベントリの空き容量は十分でしょうか？また、一度ゲームを再起動してみてください。"
+            },
+            {
+              "userExact": null,
+              "keywords": ["全選択", "記録", "フラグ"],
+              "agentReply": "データの記録に関する問題について調査いたします。どのような操作を行った際に発生しますか？"
+            },
+            {
+              "userExact": null,
+              "keywords": ["保存", "セーブ"],
+              "agentReply": "保存機能について確認いたします。エラーメッセージは表示されていますか？"
+            },
+            {
+              "userExact": null,
+              "keywords": null,
+              "agentReply": "記録機能に関するお問い合わせありがとうございます。具体的な状況を教えていただけますか？"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "agentName": "Game B Agent",
+      "kadai": [
+        {
+          "kadaiId": "kadai1",
+          "turns": [
+            {
+              "userExact": null,
+              "keywords": null,
+              "agentReply": "Game B Agentは現在、権限がありません。Game A Agentをご利用ください。"
+            }
+          ]
+        },
+        {
+          "kadaiId": "kadai2",
+          "turns": [
+            {
+              "userExact": null,
+              "keywords": null,
+              "agentReply": "Game B Agentは現在、権限がありません。Game A Agentをご利用ください。"
+            }
+          ]
+        },
+        {
+          "kadaiId": "kadai3",
+          "turns": [
+            {
+              "userExact": null,
+              "keywords": null,
+              "agentReply": "Game B Agentは現在、権限がありません。Game A Agentをご利用ください。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "agentName": "Game C Agent",
+      "kadai": [
+        {
+          "kadaiId": "kadai1",
+          "turns": [
+            {
+              "userExact": null,
+              "keywords": null,
+              "agentReply": "Game C Agentは現在、権限がありません。Game A Agentをご利用ください。"
+            }
+          ]
+        },
+        {
+          "kadaiId": "kadai2",
+          "turns": [
+            {
+              "userExact": null,
+              "keywords": null,
+              "agentReply": "Game C Agentは現在、権限がありません。Game A Agentをご利用ください。"
+            }
+          ]
+        },
+        {
+          "kadaiId": "kadai3",
+          "turns": [
+            {
+              "userExact": null,
+              "keywords": null,
+              "agentReply": "Game C Agentは現在、権限がありません。Game A Agentをご利用ください。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "agentName": "Game D Agent",
+      "kadai": [
+        {
+          "kadaiId": "kadai1",
+          "turns": [
+            {
+              "userExact": null,
+              "keywords": null,
+              "agentReply": "Game D Agentは現在、権限がありません。Game A Agentをご利用ください。"
+            }
+          ]
+        },
+        {
+          "kadaiId": "kadai2",
+          "turns": [
+            {
+              "userExact": null,
+              "keywords": null,
+              "agentReply": "Game D Agentは現在、権限がありません。Game A Agentをご利用ください。"
+            }
+          ]
+        },
+        {
+          "kadaiId": "kadai3",
+          "turns": [
+            {
+              "userExact": null,
+              "keywords": null,
+              "agentReply": "Game D Agentは現在、権限がありません。Game A Agentをご利用ください。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "agentName": "Game E Agent",
+      "kadai": [
+        {
+          "kadaiId": "kadai1",
+          "turns": [
+            {
+              "userExact": null,
+              "keywords": null,
+              "agentReply": "Game E Agentは現在、権限がありません。Game A Agentをご利用ください。"
+            }
+          ]
+        },
+        {
+          "kadaiId": "kadai2",
+          "turns": [
+            {
+              "userExact": null,
+              "keywords": null,
+              "agentReply": "Game E Agentは現在、権限がありません。Game A Agentをご利用ください。"
+            }
+          ]
+        },
+        {
+          "kadaiId": "kadai3",
+          "turns": [
+            {
+              "userExact": null,
+              "keywords": null,
+              "agentReply": "Game E Agentは現在、権限がありません。Game A Agentをご利用ください。"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
